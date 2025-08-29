@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
@@ -42,6 +42,7 @@ const POSPage: React.FC = () => {
     const [modalProduct, setModalProduct] = useState<Product | null>(null);
     const [variantProduct, setVariantProduct] = useState<Product | null>(null);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('Semua');
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -61,6 +62,15 @@ const POSPage: React.FC = () => {
         };
         loadProducts();
     }, [isShiftActive]);
+
+    const categories = useMemo(() => ['Semua', ...Array.from(new Set(products.map(p => p.category)))], [products]);
+
+    const filteredProducts = useMemo(() => {
+        if (selectedCategory === 'Semua') {
+            return products;
+        }
+        return products.filter(product => product.category === selectedCategory);
+    }, [products, selectedCategory]);
 
     const handleLogout = () => {
         logout();
@@ -198,7 +208,7 @@ const POSPage: React.FC = () => {
                                     )}
                                 </div>
                                 <div className="flex items-center" style={{minWidth: '100px', justifyContent: 'center'}}>
-                                    {product?.booking_type === 'inventory' || product?.booking_type === 'service' ? (
+                                    {(product?.booking_type === 'inventory' || product?.booking_type === 'service') || (item.name.includes('(') && item.name.includes(')')) ? (
                                         <div className="flex items-center gap-2">
                                             <button onClick={() => updateActiveCartQuantity(item.id, -1)} className="w-6 h-6 bg-gray-200 text-black rounded-full font-bold text-sm hover:bg-gray-300">-</button>
                                             <span className="w-8 text-center font-medium text-gray-700">{item.quantity}</span>
@@ -329,11 +339,26 @@ const POSPage: React.FC = () => {
         <main className={`flex-grow p-4 grid grid-cols-10 gap-4 transition-filter duration-300 ${!isShiftActive || !!modalProduct || !!variantProduct || isCheckoutOpen ? 'blur-sm pointer-events-none' : ''}`}>
             <div className={`col-span-7 bg-white p-4 rounded-lg shadow ${!activeCart ? 'opacity-50 pointer-events-none' : ''}`}>
                 <h2 className="text-xl font-bold text-gray-700 mb-4">Daftar Produk</h2>
+                <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
+                    {categories.map(category => (
+                        <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-200 ${
+                                selectedCategory === category
+                                    ? 'bg-indigo-600 text-white shadow'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            {category}
+                        </button>
+                    ))}
+                </div>
                 {isProductLoading ? (
                     <div className="text-center p-10">Memuat produk...</div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {products.map(product => (
+                        {filteredProducts.map(product => (
                             <div key={product.id} onClick={() => handleProductClick(product)} className="border rounded-lg p-2 cursor-pointer hover:shadow-lg hover:border-indigo-500 transition-all duration-200 flex flex-col">
                                 <img src={product.image_url} alt={product.name} className="w-full h-32 object-cover rounded-md mb-2" />
                                 <h3 className="font-semibold text-sm text-gray-800 flex-grow">{product.name}</h3>

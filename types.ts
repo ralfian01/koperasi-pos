@@ -36,6 +36,7 @@ export interface Product {
   member_price?: number; // Harga khusus member
   image_url: string;
   booking_type: 'inventory' | 'service' | 'time_slot' | 'consumable_stock';
+  category: string;
   variants?: Variant[];
 }
 
