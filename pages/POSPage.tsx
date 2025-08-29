@@ -7,9 +7,10 @@ import { startShift as startShiftService } from '../services/shiftService';
 import { verifyCashierPin } from '../services/cashierService';
 import { getProducts } from '../services/productService';
 import { processTransaction } from '../services/transactionService';
-import type { Product, CartSession, PaymentDetails } from '../types';
+import type { Product, CartSession, PaymentDetails, Variant } from '../types';
 import ProductDetailModal from '../components/ProductDetailModal';
 import CheckoutModal from '../components/CheckoutModal';
+import VariantSelectionModal from '../components/VariantSelectionModal';
 
 const POSPage: React.FC = () => {
     const { logout } = useAuth();
@@ -17,6 +18,7 @@ const POSPage: React.FC = () => {
     const { 
         activeCart, 
         addProductToActiveCart, 
+        addProductWithVariantToCart,
         addComplexItemToCart,
         updateActiveCartQuantity, 
         removeItemFromCart,
@@ -38,6 +40,7 @@ const POSPage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [isProductLoading, setIsProductLoading] = useState(true);
     const [modalProduct, setModalProduct] = useState<Product | null>(null);
+    const [variantProduct, setVariantProduct] = useState<Product | null>(null);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
     useEffect(() => {
@@ -93,6 +96,12 @@ const POSPage: React.FC = () => {
 
     const handleProductClick = (product: Product) => {
         if (!activeCart) return;
+
+        if (product.variants && product.variants.length > 0) {
+            setVariantProduct(product);
+            return;
+        }
+        
         if (product.booking_type === 'inventory' || product.booking_type === 'service') {
             addProductToActiveCart(product);
         } else {
@@ -103,6 +112,11 @@ const POSPage: React.FC = () => {
     const handleAddComplexItem = (product: Product, options: { quantity: number; details: string; price?: number }) => {
         addComplexItemToCart(product, options);
         setModalProduct(null);
+    };
+    
+    const handleAddToCartWithVariant = (product: Product, variant: Variant) => {
+        addProductWithVariantToCart(product, variant);
+        setVariantProduct(null);
     };
 
     const handleConfirmPayment = async (cart: CartSession, paymentDetails: PaymentDetails) => {
@@ -184,17 +198,7 @@ const POSPage: React.FC = () => {
                                     )}
                                 </div>
                                 <div className="flex items-center" style={{minWidth: '100px', justifyContent: 'center'}}>
-                                    {product?.booking_type === 'service' ? (
-                                        <button 
-                                            onClick={() => removeItemFromCart(item.id)}
-                                            className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors"
-                                            aria-label={`Hapus ${item.name}`}
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
-                                            </svg>
-                                        </button>
-                                    ) : product?.booking_type === 'inventory' ? (
+                                    {product?.booking_type === 'inventory' || product?.booking_type === 'service' ? (
                                         <div className="flex items-center gap-2">
                                             <button onClick={() => updateActiveCartQuantity(item.id, -1)} className="w-6 h-6 bg-gray-200 text-black rounded-full font-bold text-sm hover:bg-gray-300">-</button>
                                             <span className="w-8 text-center font-medium text-gray-700">{item.quantity}</span>
@@ -261,6 +265,12 @@ const POSPage: React.FC = () => {
         onClose={() => setModalProduct(null)}
         onAddToCart={handleAddComplexItem}
     />
+    <VariantSelectionModal
+        isOpen={!!variantProduct}
+        product={variantProduct}
+        onClose={() => setVariantProduct(null)}
+        onAddToCart={handleAddToCartWithVariant}
+    />
     <CheckoutModal 
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
@@ -316,7 +326,7 @@ const POSPage: React.FC = () => {
              </div>
         </header>
         
-        <main className={`flex-grow p-4 grid grid-cols-10 gap-4 transition-filter duration-300 ${!isShiftActive || !!modalProduct || isCheckoutOpen ? 'blur-sm pointer-events-none' : ''}`}>
+        <main className={`flex-grow p-4 grid grid-cols-10 gap-4 transition-filter duration-300 ${!isShiftActive || !!modalProduct || !!variantProduct || isCheckoutOpen ? 'blur-sm pointer-events-none' : ''}`}>
             <div className={`col-span-7 bg-white p-4 rounded-lg shadow ${!activeCart ? 'opacity-50 pointer-events-none' : ''}`}>
                 <h2 className="text-xl font-bold text-gray-700 mb-4">Daftar Produk</h2>
                 {isProductLoading ? (

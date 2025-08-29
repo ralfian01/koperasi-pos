@@ -1,19 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getCurrentShiftTransactions } from '../services/transactionService';
+import { getCurrentShiftTransactions, refundTransaction } from '../services/transactionService';
+import { verifyCashierPin } from '../services/cashierService';
+import { useShift } from '../hooks/useShift';
 import type { Transaction } from '../types';
 import TransactionDetailModal from '../components/TransactionDetailModal';
+import RefundPinModal from '../components/RefundPinModal';
 
 const TransactionHistoryPage: React.FC = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+    const [transactionToRefund, setTransactionToRefund] = useState<Transaction | null>(null);
+    
+    const { currentCashier } = useShift();
 
     const fetchTransactions = useCallback(async () => {
         setIsLoading(true);
         try {
             const data = await getCurrentShiftTransactions();
-            // Sort by most recent first
             setTransactions(data.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
         } catch (error) {
             console.error("Gagal memuat riwayat transaksi:", error);
@@ -34,11 +40,30 @@ const TransactionHistoryPage: React.FC = () => {
         setSelectedTransaction(null);
     };
     
-    const handleRefundSuccess = (updatedTransaction: Transaction) => {
-        // Update the list without refetching from the API for better UX
-        setTransactions(prev => 
-            prev.map(tx => tx.id === updatedTransaction.id ? updatedTransaction : tx)
-        );
+    const handleInitiateRefund = (transaction: Transaction) => {
+        setSelectedTransaction(null);
+        setTransactionToRefund(transaction);
+        setIsPinModalOpen(true);
+    };
+    
+    const handlePinModalClose = () => {
+        setIsPinModalOpen(false);
+        setTransactionToRefund(null);
+    };
+
+    const handleRefundConfirm = async (pin: string) => {
+        if (!transactionToRefund || !currentCashier) {
+            throw new Error("Sesi tidak valid atau transaksi tidak ditemukan.");
+        }
+        
+        const verifiedCashier = await verifyCashierPin(pin);
+        if (verifiedCashier.id !== currentCashier.id) {
+            throw new Error("PIN tidak cocok dengan kasir yang memulai shift ini.");
+        }
+
+        const updatedTx = await refundTransaction(transactionToRefund.id);
+        
+        setTransactions(prev => prev.map(tx => tx.id === updatedTx.id ? updatedTx : tx));
     };
 
     return (
@@ -47,7 +72,12 @@ const TransactionHistoryPage: React.FC = () => {
                 isOpen={!!selectedTransaction}
                 onClose={handleModalClose}
                 transaction={selectedTransaction}
-                onRefundSuccess={handleRefundSuccess}
+                onInitiateRefund={handleInitiateRefund}
+            />
+            <RefundPinModal
+                isOpen={isPinModalOpen}
+                onClose={handlePinModalClose}
+                onConfirm={handleRefundConfirm}
             />
             <div className="min-h-screen bg-gray-100 p-8">
                 <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8">

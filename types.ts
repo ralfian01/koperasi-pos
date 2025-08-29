@@ -19,8 +19,14 @@ export interface Cashier {
 export interface ShiftContextType {
   isShiftActive: boolean;
   currentCashier: Cashier | null;
+  shiftStartTime: string | null;
   startShift: (cashier: Cashier) => void;
   stopShift: () => void;
+}
+
+export interface Variant {
+  name: string;
+  price: number;
 }
 
 export interface Product {
@@ -30,6 +36,7 @@ export interface Product {
   member_price?: number; // Harga khusus member
   image_url: string;
   booking_type: 'inventory' | 'service' | 'time_slot' | 'consumable_stock';
+  variants?: Variant[];
 }
 
 export interface CartItem {
@@ -100,6 +107,7 @@ export interface CartContextType {
   switchSession: (sessionId: string) => void;
   addSession: () => void;
   addProductToActiveCart: (product: Product) => void;
+  addProductWithVariantToCart: (product: Product, variant: Variant) => void;
   addComplexItemToCart: (product: Product, options: { quantity: number; details: string; price?: number }) => void;
   updateActiveCartQuantity: (itemId: string, change: 1 | -1) => void;
   setSessionCustomer: (sessionId: string, details: { customer?: Customer, member?: Member }) => void;

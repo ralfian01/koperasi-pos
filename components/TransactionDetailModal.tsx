@@ -1,33 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { Transaction, CartItem } from '../types';
-import { refundTransaction } from '../services/transactionService';
 
 interface TransactionDetailModalProps {
     isOpen: boolean;
     onClose: () => void;
     transaction: Transaction | null;
-    onRefundSuccess: (updatedTransaction: Transaction) => void;
+    onInitiateRefund: (transaction: Transaction) => void;
 }
 
-const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ isOpen, onClose, transaction, onRefundSuccess }) => {
-    const [isRefunding, setIsRefunding] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    
+const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ isOpen, onClose, transaction, onInitiateRefund }) => {
     if (!isOpen || !transaction) return null;
 
-    const handleRefund = async () => {
-        if (!transaction) return;
-        setIsRefunding(true);
-        setError(null);
-        try {
-            const updatedTx = await refundTransaction(transaction.id);
-            onRefundSuccess(updatedTx);
-            onClose(); // Close modal on success
-        } catch (err: any) {
-            setError(err.message || "Gagal memproses refund.");
-        } finally {
-            setIsRefunding(false);
-        }
+    const handleRefundClick = () => {
+        onInitiateRefund(transaction);
     };
 
     const renderPaymentDetails = () => {
@@ -65,7 +50,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ isOpen,
                         <h2 className="text-2xl font-bold text-gray-800">Detail Transaksi</h2>
                         <p className="text-sm text-gray-500">ID: {transaction.id}</p>
                     </div>
-                    <button onClick={onClose} disabled={isRefunding} className="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
                 </div>
 
                 <div className="overflow-y-auto flex-grow pr-2">
@@ -138,15 +123,14 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ isOpen,
                 </div>
 
                 <div className="mt-6 border-t pt-4">
-                     {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                      <div className="flex justify-end gap-4">
-                        <button onClick={onClose} disabled={isRefunding} className="bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">Tutup</button>
+                        <button onClick={onClose} className="bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">Tutup</button>
                         <button 
-                            onClick={handleRefund}
-                            disabled={isRefunding || transaction.status === 'refunded'}
+                            onClick={handleRefundClick}
+                            disabled={transaction.status === 'refunded'}
                             className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed"
                         >
-                            {isRefunding ? 'Memproses...' : 'Refund Transaksi'}
+                            Refund Transaksi
                         </button>
                      </div>
                 </div>

@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useMemo, useCallback } from 
 import { getSessions, saveSessions, getActiveSessionId, saveActiveSessionId } from '../services/cartService';
 import { getActivePromos } from '../services/promoService';
 import { getProducts } from '../services/productService'; // Import product service
-import type { CartSession, CartContextType, Customer, Product, CartItem, Promo, Member } from '../types';
+import type { CartSession, CartContextType, Customer, Product, CartItem, Promo, Member, Variant } from '../types';
 
 export const CartContext = createContext<CartContextType | null>(null);
 
@@ -94,6 +94,33 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 product_id: product.id,
                 name: product.name,
                 price: price,
+                quantity: 1
+            };
+            newItems = [...active.items, newItem];
+        }
+        updateSessions({ ...active, items: newItems });
+    }, [sessions, activeSessionId]);
+
+    const addProductWithVariantToCart = useCallback((product: Product, variant: Variant) => {
+        const active = sessions.find(s => s.id === activeSessionId);
+        if (!active) return;
+
+        const itemName = `${product.name} (${variant.name})`;
+        const itemPrice = variant.price;
+
+        const existingItem = active.items.find(item => item.name === itemName);
+        let newItems: CartItem[];
+
+        if (existingItem) {
+            newItems = active.items.map(item =>
+                item.id === existingItem.id ? { ...item, quantity: item.quantity + 1 } : item
+            );
+        } else {
+            const newItem: CartItem = {
+                id: Date.now().toString(),
+                product_id: product.id,
+                name: itemName,
+                price: itemPrice,
                 quantity: 1
             };
             newItems = [...active.items, newItem];
@@ -277,6 +304,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchSession,
         addSession,
         addProductToActiveCart,
+        addProductWithVariantToCart,
         addComplexItemToCart,
         updateActiveCartQuantity,
         setSessionCustomer,
@@ -291,7 +319,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearAllDataForNewShift
     }), [
         sessions, activeSessionId, activeCart, isLoading, 
-        switchSession, addSession, addProductToActiveCart, addComplexItemToCart, 
+        switchSession, addSession, addProductToActiveCart, addProductWithVariantToCart, addComplexItemToCart, 
         updateActiveCartQuantity, setSessionCustomer, clearActiveCart, 
         activeCartSubtotal, appliedPromo, activeCartDiscount, activeCartTax, 
         activeCartTotal, deleteSession, removeItemFromCart, clearAllDataForNewShift

@@ -22,7 +22,7 @@ const ShiftReportPage: React.FC = () => {
     const [isPinModalOpen, setIsPinModalOpen] = useState(false);
     
     const navigate = useNavigate();
-    const { stopShift, currentCashier } = useShift();
+    const { stopShift, currentCashier, shiftStartTime } = useShift();
     const { clearAllDataForNewShift } = useCart();
     const { logout } = useAuth();
 
@@ -39,6 +39,8 @@ const ShiftReportPage: React.FC = () => {
         };
         fetchTransactions();
     }, []);
+
+    const shiftEndTime = useMemo(() => new Date(), []);
 
     const completedTransactions = useMemo(() => transactions.filter(tx => tx.status === 'completed'), [transactions]);
     const refundedTransactions = useMemo(() => transactions.filter(tx => tx.status === 'refunded'), [transactions]);
@@ -73,12 +75,25 @@ const ShiftReportPage: React.FC = () => {
         if (!currentCashier) {
             throw new Error("Tidak ada kasir yang aktif.");
         }
-        await verifyCashierPin(pin); // Throws error if pin is incorrect
+        // Verifikasi PIN dan dapatkan data kasir yang sesuai
+        const verifiedCashier = await verifyCashierPin(pin);
+
+        // Pastikan kasir yang diverifikasi sama dengan kasir yang memulai shift
+        if (verifiedCashier.id !== currentCashier.id) {
+            throw new Error("PIN tidak cocok dengan kasir yang memulai shift ini.");
+        }
+
+        // Jika cocok, lanjutkan proses selesai shift
         await stopShiftService();
         stopShift();
         clearAllDataForNewShift();
         logout();
         navigate('/login');
+    };
+    
+    const formatTime = (isoString: string | null) => {
+        if (!isoString) return 'N/A';
+        return new Date(isoString).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
     };
 
     if (isLoading) {
@@ -96,8 +111,17 @@ const ShiftReportPage: React.FC = () => {
                 <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
                     <div className="text-center mb-8 border-b pb-4">
                         <h1 className="text-3xl font-bold text-gray-800">Laporan Shift</h1>
-                        <p className="text-gray-500">Kasir: <span className="font-semibold">{currentCashier?.name || 'N/A'}</span></p>
-                        <p className="text-sm text-gray-500">{new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}</p>
+                        <p className="text-gray-500 mb-2">Kasir: <span className="font-semibold">{currentCashier?.name || 'N/A'}</span></p>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                            <div className="text-right pr-2 border-r">
+                                <p className="font-semibold">Shift Dimulai:</p>
+                                <p>{formatTime(shiftStartTime)}</p>
+                            </div>
+                            <div className="text-left pl-2">
+                                <p className="font-semibold">Shift Selesai:</p>
+                                <p>{formatTime(shiftEndTime.toISOString())}</p>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Sales Summary */}
