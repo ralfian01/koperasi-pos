@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useShift } from '../hooks/useShift';
 import { startShift as startShiftService } from '../services/shiftService';
-import { verifyCashierPin } from '../services/cashierService';
 import { getProducts } from '../services/productService';
 import { processTransaction } from '../services/transactionService';
 import type { Product, CartSession, PaymentDetails, Variant } from '../types';
@@ -92,12 +91,11 @@ const POSPage: React.FC = () => {
         setIsLoading(true);
         setPinError(null);
         try {
-            const cashierData = await verifyCashierPin(pin);
-            await startShiftService();
+            const cashierData = await startShiftService(pin);
             startShift(cashierData);
             setIsPinModalOpen(false);
         } catch (error) {
-            setPinError("PIN kasir tidak valid. Silakan coba lagi.");
+            setPinError("PIN kasir tidak valid atau gagal memulai shift. Silakan coba lagi.");
         } finally {
             setIsLoading(false);
             setPin('');
@@ -288,20 +286,9 @@ const POSPage: React.FC = () => {
         total={activeCartTotal}
         onConfirmPayment={handleConfirmPayment}
     />
-    <div className="min-h-screen bg-background flex flex-col relative">
-        {!isShiftActive && (
-            <div className="absolute inset-0 bg-gray-900 bg-opacity-70 z-40 flex items-center justify-center backdrop-blur-sm">
-                <div className="bg-surface p-10 rounded-xl shadow-2xl text-center">
-                    <h2 className="text-3xl font-bold text-text-primary mb-4">Shift Belum Dimulai</h2>
-                    <p className="text-text-secondary mb-8">Klik tombol di bawah untuk memulai shift baru.</p>
-                    <button onClick={handleOpenPinModal} className="w-full bg-accent text-white font-bold py-3 px-8 rounded-lg hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition-all duration-300 shadow-lg">
-                        Mulai Shift
-                    </button>
-                </div>
-            </div>
-        )}
+    <div className="min-h-screen bg-background flex flex-col">
         {isPinModalOpen && (
-            <div className="absolute inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center backdrop-blur-md">
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center backdrop-blur-md">
                 <div className="bg-surface p-8 rounded-lg shadow-2xl w-full max-w-sm">
                     <h2 className="text-2xl font-bold text-center text-text-primary mb-6">Masukkan PIN Kasir</h2>
                     <form onSubmit={handlePinSubmit}>
@@ -336,43 +323,56 @@ const POSPage: React.FC = () => {
              </div>
         </header>
         
-        <main className={`flex-grow p-4 grid grid-cols-10 gap-4 transition-filter duration-300 ${!isShiftActive || !!modalProduct || !!variantProduct || isCheckoutOpen ? 'blur-sm pointer-events-none' : ''}`}>
-            <div className={`col-span-7 bg-surface p-4 rounded-lg shadow ${!activeCart ? 'opacity-50 pointer-events-none' : ''}`}>
-                <h2 className="text-xl font-bold text-text-secondary mb-4">Daftar Produk</h2>
-                <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
-                    {categories.map(category => (
-                        <button
-                            key={category}
-                            onClick={() => setSelectedCategory(category)}
-                            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-200 ${
-                                selectedCategory === category
-                                    ? 'bg-primary text-white shadow'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            {category}
-                        </button>
-                    ))}
-                </div>
-                {isProductLoading ? (
-                    <div className="text-center p-10">Memuat produk...</div>
-                ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {filteredProducts.map(product => (
-                            <div key={product.id} onClick={() => handleProductClick(product)} className="border rounded-lg p-2 cursor-pointer hover:shadow-lg hover:border-primary transition-all duration-200 flex flex-col">
-                                <img src={product.image_url} alt={product.name} className="w-full h-32 object-cover rounded-md mb-2" />
-                                <h3 className="font-semibold text-sm text-text-primary flex-grow">{product.name}</h3>
-                                <p className="text-primary font-bold mt-1">Rp{product.price.toLocaleString('id-ID')}</p>
-                            </div>
+        <main className="relative flex-grow p-4 grid grid-cols-10 gap-4">
+            <div className={`contents transition-filter duration-300 ${!isShiftActive || !!modalProduct || !!variantProduct || isCheckoutOpen ? 'blur-sm pointer-events-none' : ''}`}>
+                <div className={`col-span-7 bg-surface p-4 rounded-lg shadow ${!activeCart ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <h2 className="text-xl font-bold text-text-secondary mb-4">Daftar Produk</h2>
+                    <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
+                        {categories.map(category => (
+                            <button
+                                key={category}
+                                onClick={() => setSelectedCategory(category)}
+                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-200 ${
+                                    selectedCategory === category
+                                        ? 'bg-primary text-white shadow'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                            >
+                                {category}
+                            </button>
                         ))}
                     </div>
-                )}
-            </div>
+                    {isProductLoading ? (
+                        <div className="text-center p-10">Memuat produk...</div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            {filteredProducts.map(product => (
+                                <div key={product.id} onClick={() => handleProductClick(product)} className="border rounded-lg p-2 cursor-pointer hover:shadow-lg hover:border-primary transition-all duration-200 flex flex-col">
+                                    <img src={product.image_url} alt={product.name} className="w-full h-32 object-cover rounded-md mb-2" />
+                                    <h3 className="font-semibold text-sm text-text-primary flex-grow">{product.name}</h3>
+                                    <p className="text-primary font-bold mt-1">Rp{product.price.toLocaleString('id-ID')}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-            <div className="col-span-3 bg-surface p-4 rounded-lg shadow flex flex-col">
-                <h2 className="text-xl font-bold text-text-secondary mb-4">Keranjang</h2>
-                {renderCartContent()}
+                <div className="col-span-3 bg-surface p-4 rounded-lg shadow flex flex-col">
+                    <h2 className="text-xl font-bold text-text-secondary mb-4">Keranjang</h2>
+                    {renderCartContent()}
+                </div>
             </div>
+            {!isShiftActive && (
+                <div className="absolute inset-x-0 bottom-0 top-16 bg-gray-900 bg-opacity-70 z-40 flex items-center justify-center">
+                    <div className="bg-surface p-10 rounded-xl shadow-2xl text-center">
+                        <h2 className="text-3xl font-bold text-text-primary mb-4">Shift Belum Dimulai</h2>
+                        <p className="text-text-secondary mb-8">Klik tombol di bawah untuk memulai shift baru.</p>
+                        <button onClick={handleOpenPinModal} className="w-full bg-accent text-white font-bold py-3 px-8 rounded-lg hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition-all duration-300 shadow-lg">
+                            Mulai Shift
+                        </button>
+                    </div>
+                </div>
+            )}
         </main>
     </div>
     </>

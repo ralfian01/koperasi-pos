@@ -1,30 +1,20 @@
 import type { Promo } from '../types';
 
-const API_BASE_URL = 'https://api.majukoperasiku.my.id';
-
-const getAuthHeaders = (): Headers => {
-  const token = localStorage.getItem('token');
-  const headers = new Headers();
-  if (token) {
-    headers.append('Authorization', `Bearer ${token}`);
-  }
-  return headers;
-}
+const mockPromos: Promo[] = [
+    { id: 'PROMO1', name: 'Diskon Hari Kerja', type: 'weekday', value: 10 },
+    { id: 'PROMO2', name: 'Happy Hour Sore', type: 'happy_hour', value: 20, happy_hour_start: 14, happy_hour_end: 17 },
+    { id: 'PROMO3', name: 'Diskon Belanja > 50rb', type: 'min_spend', value: 15, min_spend: 50000 },
+];
 
 /**
- * Fetches all available promos from the API.
+ * Fetches all available promos from a mock source.
  * @returns A Promise that resolves with an array of promos.
  */
 export const getActivePromos = async (): Promise<Promo[]> => {
-  const response = await fetch(`${API_BASE_URL}/promos`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
+  console.log('MOCK API: Fetching promos...');
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(mockPromos);
+    }, 300); // Simulate network delay
   });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: 'Failed to fetch promos' }));
-    throw new Error(errorData.message || 'Failed to fetch promos');
-  }
-  
-  return response.json();
 };

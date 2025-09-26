@@ -14,17 +14,16 @@ export const login = async (username: string, password: string): Promise<{ token
     headers: headers,
   });
 
+  const responseBody = await response.json();
+
   if (!response.ok) {
     // Throws an error for 4xx/5xx responses
-    const errorData = await response.json().catch(() => ({ message: 'Invalid credentials' }));
-    throw new Error(errorData.message || 'Invalid credentials');
+    throw new Error(responseBody.message || 'Invalid credentials');
   }
 
-  const data = await response.json();
-  
-  if (!data.token) {
-    throw new Error('Token not found in login response');
+  if (responseBody.status === 'SUCCESS' && responseBody.data && responseBody.data.token) {
+    return { token: responseBody.data.token };
   }
   
-  return data;
+  throw new Error('Token not found in login response');
 };
