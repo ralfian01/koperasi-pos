@@ -1,7 +1,7 @@
 // This is a mock API service for cashier management.
 import type { Cashier } from '../types';
 
-const API_BASE_URL = 'https://api.majukoperasiku.my.id';
+const API_BASE_URL = 'https://api.majukoperasiky.my.id';
 
 const getAuthHeaders = (): Headers => {
   const token = localStorage.getItem('token');

@@ -1,6 +1,6 @@
 import type { CartSession, PaymentDetails, Transaction } from '../types';
 
-const API_BASE_URL = 'https://api.majukoperasiku.my.id';
+const API_BASE_URL = 'https://api.majukoperasiky.my.id';
 
 interface TransactionResponse {
   success: boolean;
