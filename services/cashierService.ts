@@ -1,12 +1,18 @@
 // This is a mock API service for cashier management.
 import type { Cashier } from '../types';
 
-// Mock database of cashiers
-const cashiers: Record<string, Cashier> = {
-  '123456': { id: 1, name: 'Budi Santoso' },
-  '654321': { id: 2, name: 'Siti Aminah' },
-  '112233': { id: 3, name: 'Eka Wijaya' },
-};
+const API_BASE_URL = 'https://api.majukoperasiku.my.id';
+
+const getAuthHeaders = (): Headers => {
+  const token = localStorage.getItem('token');
+  const headers = new Headers({
+    'Content-Type': 'application/json',
+  });
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
+  return headers;
+}
 
 /**
  * Verifies a cashier's PIN.
@@ -14,17 +20,17 @@ const cashiers: Record<string, Cashier> = {
  * @param pin The 6-digit PIN to verify.
  * @returns A Promise that resolves with the Cashier object if the PIN is valid.
  */
-export const verifyCashierPin = (pin: string): Promise<Cashier> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const cashier = cashiers[pin];
-      if (cashier) {
-        console.log(`API: PIN ${pin} verified for cashier: ${cashier.name}`);
-        resolve(cashier);
-      } else {
-        console.log(`API: PIN ${pin} is invalid.`);
-        reject(new Error('Invalid PIN'));
-      }
-    }, 700); // Simulate network delay
-  });
+export const verifyCashierPin = async (pin: string): Promise<Cashier> => {
+    const response = await fetch(`${API_BASE_URL}/cashiers/verify-pin`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ pin })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Invalid PIN' }));
+        throw new Error(errorData.message || 'Invalid PIN');
+    }
+
+    return response.json();
 };

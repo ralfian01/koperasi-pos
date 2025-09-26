@@ -1,13 +1,42 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>React POS System</title>
+    <title>Koperasi Yudha Dharma Utama POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  <script type="importmap">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: '#D62828',
+                dark: '#B02020',
+              },
+              secondary: {
+                DEFAULT: '#FCD703',
+                dark: '#E0BF00',
+              },
+              accent: {
+                DEFAULT: '#298A36',
+                dark: '#1F6828',
+              },
+              background: '#F8F7F4',
+              surface: '#FFFFFF',
+              'text-primary': '#212121',
+              'text-secondary': '#555555',
+              destructive: {
+                DEFAULT: '#C70000',
+                dark: '#A00000',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <script type="importmap">
 {
   "imports": {
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.8.2",
@@ -18,7 +47,7 @@
 }
 </script>
 </head>
-  <body class="bg-gray-100">
+  <body class="bg-background text-text-primary">
     <div id="root"></div>
   </body>
 </html>

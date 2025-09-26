@@ -77,16 +77,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
 
     return (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center backdrop-blur-sm" aria-modal="true" role="dialog">
-            <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg m-4">
+            <div className="bg-surface p-8 rounded-lg shadow-2xl w-full max-w-lg m-4">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold text-gray-800">Pembayaran</h2>
+                    <h2 className="text-3xl font-bold text-text-primary">Pembayaran</h2>
                     <button onClick={onClose} disabled={isProcessing} className="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
                 </div>
                 
-                <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
+                <div className="mb-6 p-4 bg-primary/10 rounded-lg">
                     <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-gray-800">Total Belanja</span>
-                        <span className="text-2xl font-extrabold text-indigo-600">Rp{total.toLocaleString('id-ID')}</span>
+                        <span className="text-lg font-bold text-text-primary">Total Belanja</span>
+                        <span className="text-2xl font-extrabold text-primary">Rp{total.toLocaleString('id-ID')}</span>
                     </div>
                 </div>
 
@@ -99,7 +99,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 disabled={isProcessing}
                                 className={`w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors ${
                                     activeTab === tab 
-                                    ? 'border-indigo-500 text-indigo-600' 
+                                    ? 'border-primary text-primary' 
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                             >
@@ -113,7 +113,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                     {activeTab === 'cash' && (
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="cash-amount" className="block text-sm font-medium text-gray-700">Jumlah Bayar</label>
+                                <label htmlFor="cash-amount" className="block text-sm font-medium text-text-secondary">Jumlah Bayar</label>
                                 <input
                                     type="number"
                                     id="cash-amount"
@@ -125,14 +125,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 />
                             </div>
                             <div className="flex justify-between items-center p-3 bg-gray-100 rounded-md">
-                                <span className="font-medium text-gray-700">Kembalian:</span>
-                                <span className="font-bold text-xl text-green-600">Rp{changeAmount.toLocaleString('id-ID')}</span>
+                                <span className="font-medium text-text-secondary">Kembalian:</span>
+                                <span className="font-bold text-xl text-accent">Rp{changeAmount.toLocaleString('id-ID')}</span>
                             </div>
                         </div>
                     )}
                      {activeTab === 'edc' && (
                         <div className="space-y-4">
-                            <label htmlFor="edc-last4" className="block text-sm font-medium text-gray-700">4 Digit Terakhir Kartu</label>
+                            <label htmlFor="edc-last4" className="block text-sm font-medium text-text-secondary">4 Digit Terakhir Kartu</label>
                             <input
                                 type="text"
                                 id="edc-last4"
@@ -147,7 +147,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                     {activeTab === 'qris' && (
                         <div className="text-center flex flex-col items-center">
                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Example" alt="QR Code" className="w-40 h-40 border rounded-lg" />
-                             <p className="mt-4 text-gray-600">Pindai kode QR untuk menyelesaikan pembayaran.</p>
+                             <p className="mt-4 text-text-secondary">Pindai kode QR untuk menyelesaikan pembayaran.</p>
                         </div>
                     )}
                 </div>
@@ -165,7 +165,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                         type="button"
                         onClick={handleConfirm}
                         disabled={isConfirmDisabled}
-                        className="w-full sm:w-auto justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 disabled:bg-indigo-300"
+                        className="w-full sm:w-auto justify-center rounded-md border border-transparent bg-primary px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-primary-dark disabled:bg-primary/60"
                     >
                         {isProcessing ? 'Memproses...' : 'Konfirmasi Pembayaran'}
                     </button>

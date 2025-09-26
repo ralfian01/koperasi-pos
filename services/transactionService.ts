@@ -1,6 +1,6 @@
 import type { CartSession, PaymentDetails, Transaction } from '../types';
 
-const SHIFT_TRANSACTIONS_KEY = 'pos_shift_transactions';
+const API_BASE_URL = 'https://api.majukoperasiku.my.id';
 
 interface TransactionResponse {
   success: boolean;
@@ -8,129 +8,96 @@ interface TransactionResponse {
   message: string;
 }
 
-// Helper function to get transactions from sessionStorage without delay
-const getCurrentShiftTransactionsSync = (): Transaction[] => {
-  try {
-    const storedData = sessionStorage.getItem(SHIFT_TRANSACTIONS_KEY);
-    return storedData ? JSON.parse(storedData) : [];
-  } catch (error) {
-    console.error("Gagal membaca riwayat transaksi dari sessionStorage", error);
-    return [];
+const getAuthHeaders = (hasBody: boolean = false): Headers => {
+  const token = localStorage.getItem('token');
+  const headers = new Headers();
+  if (hasBody) {
+    headers.append('Content-Type', 'application/json');
   }
-};
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
+  return headers;
+}
+
+const handleApiError = async (response: Response, defaultMessage: string): Promise<never> => {
+    const errorData = await response.json().catch(() => ({ message: defaultMessage }));
+    throw new Error(errorData.message || defaultMessage);
+}
 
 /**
- * Mocks processing a transaction, then saves it to sessionStorage to simulate a shift history.
+ * Processes a transaction by sending it to the backend API.
  */
-export const processTransaction = (
+export const processTransaction = async (
   cart: CartSession,
   paymentDetails: PaymentDetails,
   totals: { subtotal: number; tax: number; total: number; discount: number; promoApplied: string | null; }
 ): Promise<TransactionResponse> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (!cart || cart.items.length === 0) {
-        return reject(new Error('Keranjang kosong, tidak dapat memproses transaksi.'));
-      }
+  if (!cart || cart.items.length === 0) {
+    throw new Error('Keranjang kosong, tidak dapat memproses transaksi.');
+  }
+  
+  const payload = {
+    cart,
+    paymentDetails,
+    totals
+  };
 
-      const transactionId = `TRX-${Date.now()}`;
-
-      const newTransaction: Transaction = {
-        id: transactionId,
-        cart_id: cart.id,
-        timestamp: new Date().toISOString(),
-        customer: cart.customer,
-        items: cart.items,
-        subtotal: totals.subtotal,
-        promo_applied: totals.promoApplied ?? undefined,
-        discount: totals.discount,
-        tax: totals.tax,
-        total: totals.total,
-        payment: paymentDetails,
-        status: 'completed',
-      };
-
-      try {
-        const existingTransactions = getCurrentShiftTransactionsSync();
-        const updatedTransactions = [...existingTransactions, newTransaction];
-        sessionStorage.setItem(SHIFT_TRANSACTIONS_KEY, JSON.stringify(updatedTransactions));
-        
-        console.log('API: Transaksi berhasil diproses dan disimpan ke riwayat shift:', newTransaction);
-        
-        resolve({
-          success: true,
-          transactionId,
-          message: 'Pembayaran berhasil dikonfirmasi.',
-        });
-      } catch (error) {
-        console.error("Gagal menyimpan transaksi ke riwayat shift", error);
-        reject(new Error("Gagal menyimpan riwayat transaksi."));
-      }
-    }, 1500);
+  const response = await fetch(`${API_BASE_URL}/transactions`, {
+    method: 'POST',
+    headers: getAuthHeaders(true),
+    body: JSON.stringify(payload),
   });
+
+  if (!response.ok) {
+    return handleApiError(response, 'Gagal memproses transaksi.');
+  }
+
+  return response.json();
 };
 
 /**
- * Fetches the list of completed transactions for the current shift from sessionStorage.
+ * Fetches the list of completed transactions for the current shift from the API.
  */
-export const getCurrentShiftTransactions = (): Promise<Transaction[]> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(getCurrentShiftTransactionsSync());
-        }, 500); // Simulate network delay
+export const getCurrentShiftTransactions = async (): Promise<Transaction[]> => {
+    const response = await fetch(`${API_BASE_URL}/transactions/shift`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
     });
+
+    if (!response.ok) {
+        return handleApiError(response, 'Gagal mengambil riwayat transaksi.');
+    }
+    return response.json();
 };
 
 
 /**
- * Fetches a single transaction by its ID from sessionStorage.
+ * Fetches a single transaction by its ID from the API.
  */
-export const getTransactionById = (transactionId: string): Promise<Transaction> => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const transactions = getCurrentShiftTransactionsSync();
-            const transaction = transactions.find(tx => tx.id === transactionId);
-            if (transaction) {
-                resolve(transaction);
-            } else {
-                reject(new Error("Transaksi tidak ditemukan."));
-            }
-        }, 300); // Simulate network delay
+export const getTransactionById = async (transactionId: string): Promise<Transaction> => {
+    const response = await fetch(`${API_BASE_URL}/transactions/${transactionId}`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
     });
+
+    if (!response.ok) {
+        return handleApiError(response, 'Transaksi tidak ditemukan.');
+    }
+    return response.json();
 };
 
 /**
- * Mocks refunding a transaction by updating its status in sessionStorage.
+ * Refunds a transaction by calling the API.
  */
-export const refundTransaction = (transactionId: string): Promise<Transaction> => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const transactions = getCurrentShiftTransactionsSync();
-            let refundedTransaction: Transaction | null = null;
-            
-            const updatedTransactions = transactions.map(tx => {
-                if (tx.id === transactionId) {
-                    if (tx.status === 'refunded') {
-                        reject(new Error("Transaksi ini sudah di-refund."));
-                        return tx;
-                    }
-                    refundedTransaction = { ...tx, status: 'refunded' };
-                    return refundedTransaction;
-                }
-                return tx;
-            });
-
-            if (refundedTransaction) {
-                 try {
-                    sessionStorage.setItem(SHIFT_TRANSACTIONS_KEY, JSON.stringify(updatedTransactions));
-                    console.log(`API: Transaksi ${transactionId} berhasil di-refund.`);
-                    resolve(refundedTransaction);
-                 } catch (error) {
-                    reject(new Error("Gagal menyimpan status refund."));
-                 }
-            } else {
-                reject(new Error("Transaksi tidak ditemukan."));
-            }
-        }, 1000); // Simulate network delay for refund process
+export const refundTransaction = async (transactionId: string): Promise<Transaction> => {
+    const response = await fetch(`${API_BASE_URL}/transactions/${transactionId}/refund`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
     });
+
+    if (!response.ok) {
+        return handleApiError(response, 'Gagal me-refund transaksi.');
+    }
+    return response.json();
 };

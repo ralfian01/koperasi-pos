@@ -1,34 +1,36 @@
 import type { Member } from '../types';
 
-// Mock database of members
-const members: Member[] = [
-  { id: 101, name: 'Adi Prasetyo', phone: '081234567890' },
-  { id: 102, name: 'Citra Lestari', phone: '081223344556' },
-  { id: 103, name: 'Bambang Gunawan', phone: '085678901234' },
-  { id: 104, name: 'Dewi Anggraini', phone: '087712345678' },
-  { id: 105, name: 'Fajar Nugroho', phone: '089955556666' },
-];
+const API_BASE_URL = 'https://api.majukoperasiku.my.id';
+
+const getAuthHeaders = (): Headers => {
+  const token = localStorage.getItem('token');
+  const headers = new Headers();
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
+  return headers;
+}
+
 
 /**
  * Searches for members by name or phone number.
  * @param query The search term.
  * @returns A Promise that resolves with an array of matching members.
  */
-export const searchMembers = (query: string): Promise<Member[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (!query) {
-        resolve([]);
-        return;
-      }
-      const lowercasedQuery = query.toLowerCase();
-      const results = members.filter(
-        (member) =>
-          member.name.toLowerCase().includes(lowercasedQuery) ||
-          member.phone.includes(query)
-      );
-      console.log(`API: Found ${results.length} members for query "${query}".`);
-      resolve(results);
-    }, 400); // Simulate network delay
+export const searchMembers = async (query: string): Promise<Member[]> => {
+  if (!query) {
+    return [];
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/members/search?q=${encodeURIComponent(query)}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Failed to search members' }));
+    throw new Error(errorData.message || 'Failed to search members');
+  }
+
+  return response.json();
 };

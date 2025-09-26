@@ -175,11 +175,12 @@ const ShiftReportPage: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {Object.entries(productSales).length > 0 ? Object.entries(productSales).map(([name, data]) => (
+                                    {/* FIX: Changed from Object.entries to Object.keys to fix type inference issues where `data` was 'unknown'. */}
+                                    {Object.keys(productSales).length > 0 ? Object.keys(productSales).map((name) => (
                                         <tr key={name}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{name}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{data.quantity}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-right font-semibold">Rp{data.total.toLocaleString('id-ID')}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{productSales[name].quantity}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-right font-semibold">Rp{productSales[name].total.toLocaleString('id-ID')}</td>
                                         </tr>
                                     )) : (
                                         <tr>

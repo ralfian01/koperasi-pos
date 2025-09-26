@@ -72,17 +72,17 @@ const CustomerPage: React.FC = () => {
                 onClose={() => setIsMemberSearchOpen(false)}
                 onSelect={handleMemberSelect}
             />
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="w-full max-w-lg p-8 space-y-8 bg-white rounded-2xl shadow-lg">
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-full max-w-lg p-8 space-y-8 bg-surface rounded-2xl shadow-lg">
                     <div className="text-center">
-                        <h1 className="text-3xl font-bold text-gray-900">Informasi Pelanggan</h1>
-                        <p className="text-gray-500">Sesi ...{sessionId?.slice(-4)}</p>
+                        <h1 className="text-3xl font-bold text-text-primary">Informasi Pelanggan</h1>
+                        <p className="text-text-secondary">Sesi ...{sessionId?.slice(-4)}</p>
                     </div>
 
                     <button
                         type="button"
                         onClick={() => setIsMemberSearchOpen(true)}
-                        className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-indigo-600 text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-primary text-sm font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                     >
                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
@@ -95,14 +95,14 @@ const CustomerPage: React.FC = () => {
                             <div className="w-full border-t border-gray-300" />
                         </div>
                         <div className="relative flex justify-center">
-                            <span className="bg-white px-2 text-sm text-gray-500">atau isi manual</span>
+                            <span className="bg-surface px-2 text-sm text-text-secondary">atau isi manual</span>
                         </div>
                     </div>
 
                     <form className="mt-8 space-y-6" onSubmit={handleSave}>
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="customer-name" className="text-sm font-medium text-gray-700">
+                                <label htmlFor="customer-name" className="text-sm font-medium text-text-secondary">
                                     Nama Pelanggan
                                 </label>
                                 <input
@@ -112,12 +112,12 @@ const CustomerPage: React.FC = () => {
                                     autoComplete="name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="mt-1 appearance-none block w-full px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm"
+                                    className="mt-1 appearance-none block w-full px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm text-text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                                     placeholder="Masukkan nama pelanggan"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="customer-phone" className="text-sm font-medium text-gray-700">
+                                <label htmlFor="customer-phone" className="text-sm font-medium text-text-secondary">
                                     Nomor Telepon
                                 </label>
                                 <input
@@ -127,7 +127,7 @@ const CustomerPage: React.FC = () => {
                                     autoComplete="tel"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
-                                    className="mt-1 appearance-none block w-full px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm"
+                                    className="mt-1 appearance-none block w-full px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm text-text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                                     placeholder="Masukkan nomor telepon"
                                 />
                             </div>
@@ -137,13 +137,13 @@ const CustomerPage: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={handleCancel}
-                                className="w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                             >
                                 Kembali
                             </button>
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                             >
                                 Simpan Perubahan
                             </button>
@@ -154,7 +154,7 @@ const CustomerPage: React.FC = () => {
                         <button
                             type="button"
                             onClick={handleRemoveCustomer}
-                            className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-destructive bg-destructive/10 hover:bg-destructive/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive"
                         >
                             Hapus Pelanggan dari Sesi
                         </button>

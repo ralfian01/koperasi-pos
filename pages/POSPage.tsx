@@ -154,16 +154,16 @@ const POSPage: React.FC = () => {
     
     const renderCartContent = () => {
         if (isCartLoading) {
-            return <p className="text-gray-500 text-center mt-10">Memuat sesi...</p>;
+            return <p className="text-text-secondary text-center mt-10">Memuat sesi...</p>;
         }
         
         if (!activeCart) {
             return (
                 <div className="text-center mt-10 flex flex-col items-center">
-                    <p className="text-gray-500 mb-4">Tidak ada sesi transaksi aktif.</p>
+                    <p className="text-text-secondary mb-4">Tidak ada sesi transaksi aktif.</p>
                     <button 
                         onClick={() => navigate('/pos/sessions')}
-                        className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700"
+                        className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary-dark"
                     >
                         Pilih atau Buat Sesi
                     </button>
@@ -174,25 +174,25 @@ const POSPage: React.FC = () => {
         return (
             <>
                 <div onClick={() => navigate('/pos/sessions')} className="border-b pb-4 mb-4 p-3 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <h3 className="text-md font-semibold text-gray-600 mb-1">Pelanggan (Sesi ID: ...{activeCart.id.slice(-4)})</h3>
+                    <h3 className="text-md font-semibold text-text-secondary mb-1">Pelanggan (Sesi ID: ...{activeCart.id.slice(-4)})</h3>
                     {activeCart.customer.name ? (
                         <div>
                              <div className="flex items-center gap-2">
-                                <p className="font-bold text-gray-800">{activeCart.customer.name}</p>
+                                <p className="font-bold text-text-primary">{activeCart.customer.name}</p>
                                 {activeCart.memberId && (
                                     <span className="text-xs font-bold text-purple-600 bg-purple-100 py-0.5 px-2 rounded-full">MEMBER</span>
                                 )}
                             </div>
-                            <p className="text-sm text-gray-500">{activeCart.customer.phone}</p>
+                            <p className="text-sm text-text-secondary">{activeCart.customer.phone}</p>
                         </div>
                     ) : (
-                        <p className="text-gray-500">Pelanggan Umum <span className="text-indigo-500 text-sm">(Ganti Sesi)</span></p>
+                        <p className="text-text-secondary">Pelanggan Umum <span className="text-primary text-sm">(Ganti Sesi)</span></p>
                     )}
                 </div>
                 
                 <div className="flex-grow overflow-y-auto">
                     {activeCart.items.length === 0 ? (
-                        <p className="text-gray-500 text-center mt-10">Keranjang masih kosong.</p>
+                        <p className="text-text-secondary text-center mt-10">Keranjang masih kosong.</p>
                     ) : (
                         activeCart.items.map(item => {
                             const product = products.find(p => p.id === item.product_id);
@@ -200,11 +200,11 @@ const POSPage: React.FC = () => {
                             return (
                              <div key={item.id} className="flex justify-between items-center mb-3">
                                 <div className="flex-grow">
-                                    <p className="font-semibold text-sm text-gray-800">{item.name}</p>
+                                    <p className="font-semibold text-sm text-text-primary">{item.name}</p>
                                     {item.details ? (
-                                        <p className="text-xs text-indigo-600 font-medium">{item.details}</p>
+                                        <p className="text-xs text-primary font-medium">{item.details}</p>
                                     ) : (
-                                        <p className="text-xs text-gray-500">Rp{item.price.toLocaleString('id-ID')}</p>
+                                        <p className="text-xs text-text-secondary">Rp{item.price.toLocaleString('id-ID')}</p>
                                     )}
                                 </div>
                                 <div className="flex items-center" style={{minWidth: '100px', justifyContent: 'center'}}>
@@ -219,7 +219,7 @@ const POSPage: React.FC = () => {
                                             <span className="font-medium text-gray-700">x{item.quantity}</span>
                                             <button 
                                                 onClick={() => removeItemFromCart(item.id)}
-                                                className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors"
+                                                className="text-destructive hover:text-destructive-dark p-1 rounded-full transition-colors"
                                                 aria-label={`Hapus ${item.name}`}
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -238,27 +238,27 @@ const POSPage: React.FC = () => {
                 
                 <div className="border-t pt-4 mt-4 space-y-2">
                     <div className="flex justify-between items-center text-md">
-                        <span className="text-gray-600">Subtotal</span>
-                        <span className="font-medium text-gray-800">Rp{activeCartSubtotal.toLocaleString('id-ID')}</span>
+                        <span className="text-text-secondary">Subtotal</span>
+                        <span className="font-medium text-text-primary">Rp{activeCartSubtotal.toLocaleString('id-ID')}</span>
                     </div>
                     {appliedPromo && (
-                        <div className="flex justify-between items-center text-md text-green-600">
+                        <div className="flex justify-between items-center text-md text-accent">
                             <span className="font-semibold">{appliedPromo.name}</span>
                             <span className="font-semibold">-Rp{activeCartDiscount.toLocaleString('id-ID')}</span>
                         </div>
                     )}
                     <div className="flex justify-between items-center text-md">
-                        <span className="text-gray-600">PPN (11%)</span>
-                        <span className="font-medium text-gray-800">Rp{activeCartTax.toLocaleString('id-ID')}</span>
+                        <span className="text-text-secondary">PPN (11%)</span>
+                        <span className="font-medium text-text-primary">Rp{activeCartTax.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="flex justify-between items-center text-lg pt-2 border-t mt-2">
-                        <span className="font-bold text-gray-800">Total</span>
-                        <span className="font-extrabold text-indigo-600">Rp{activeCartTotal.toLocaleString('id-ID')}</span>
+                        <span className="font-bold text-text-primary">Total</span>
+                        <span className="font-extrabold text-primary">Rp{activeCartTotal.toLocaleString('id-ID')}</span>
                     </div>
                     <button 
                         onClick={() => setIsCheckoutOpen(true)}
                         disabled={activeCart.items.length === 0} 
-                        className="w-full !mt-4 bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400"
+                        className="w-full !mt-4 bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary-dark disabled:bg-gray-400"
                     >
                         Checkout
                     </button>
@@ -288,13 +288,13 @@ const POSPage: React.FC = () => {
         total={activeCartTotal}
         onConfirmPayment={handleConfirmPayment}
     />
-    <div className="min-h-screen bg-gray-50 flex flex-col relative">
+    <div className="min-h-screen bg-background flex flex-col relative">
         {!isShiftActive && (
             <div className="absolute inset-0 bg-gray-900 bg-opacity-70 z-40 flex items-center justify-center backdrop-blur-sm">
-                <div className="bg-white p-10 rounded-xl shadow-2xl text-center">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-4">Shift Belum Dimulai</h2>
-                    <p className="text-gray-600 mb-8">Klik tombol di bawah untuk memulai shift baru.</p>
-                    <button onClick={handleOpenPinModal} className="w-full bg-green-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 shadow-lg">
+                <div className="bg-surface p-10 rounded-xl shadow-2xl text-center">
+                    <h2 className="text-3xl font-bold text-text-primary mb-4">Shift Belum Dimulai</h2>
+                    <p className="text-text-secondary mb-8">Klik tombol di bawah untuk memulai shift baru.</p>
+                    <button onClick={handleOpenPinModal} className="w-full bg-accent text-white font-bold py-3 px-8 rounded-lg hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition-all duration-300 shadow-lg">
                         Mulai Shift
                     </button>
                 </div>
@@ -302,14 +302,14 @@ const POSPage: React.FC = () => {
         )}
         {isPinModalOpen && (
             <div className="absolute inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center backdrop-blur-md">
-                <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm">
-                    <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Masukkan PIN Kasir</h2>
+                <div className="bg-surface p-8 rounded-lg shadow-2xl w-full max-w-sm">
+                    <h2 className="text-2xl font-bold text-center text-text-primary mb-6">Masukkan PIN Kasir</h2>
                     <form onSubmit={handlePinSubmit}>
-                        <input type="password" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))} maxLength={6} autoFocus className="w-full text-center text-3xl tracking-[1rem] text-gray-800 bg-gray-100 border-2 border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="------" />
-                        {pinError && <p className="text-red-500 text-sm text-center mt-4">{pinError}</p>}
+                        <input type="password" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))} maxLength={6} autoFocus className="w-full text-center text-3xl tracking-[1rem] text-text-primary bg-gray-100 border-2 border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="------" />
+                        {pinError && <p className="text-destructive text-sm text-center mt-4">{pinError}</p>}
                         <div className="flex gap-4 mt-8">
                              <button type="button" onClick={() => setIsPinModalOpen(false)} className="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
-                             <button type="submit" disabled={isLoading || pin.length !== 6} className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 transition-colors">
+                             <button type="submit" disabled={isLoading || pin.length !== 6} className="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:bg-primary/70 transition-colors">
                                 {isLoading ? 'Memverifikasi...' : 'Verifikasi'}
                              </button>
                         </div>
@@ -318,27 +318,27 @@ const POSPage: React.FC = () => {
             </div>
         )}
         
-        <header className="bg-white shadow-md p-4 flex justify-between items-center z-10">
-             <h1 className="text-2xl font-bold text-gray-800">Sistem POS</h1>
+        <header className="bg-surface shadow-md p-4 flex justify-between items-center z-10">
+             <h1 className="text-2xl font-bold text-text-primary">Sistem POS</h1>
              <div className="space-x-4 flex items-center">
-                {isShiftActive && currentCashier && (<span className="text-gray-700 font-medium">Kasir: <span className="font-bold text-indigo-600">{currentCashier.name}</span></span>)}
+                {isShiftActive && currentCashier && (<span className="text-text-secondary font-medium">Kasir: <span className="font-bold text-primary">{currentCashier.name}</span></span>)}
                 {isShiftActive && (
                     <>
-                        <Link to="/pos/history" className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300">
+                        <Link to="/pos/history" className="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors duration-300">
                            Riwayat Transaksi
                         </Link>
-                        <Link to="/pos/shift-report" className="bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors duration-300">
+                        <Link to="/pos/shift-report" className="bg-secondary text-text-primary font-semibold py-2 px-4 rounded-lg hover:bg-secondary-dark transition-colors duration-300">
                            Selesai Shift
                         </Link>
                     </>
                 )}
-                <button onClick={handleLogout} className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300">Logout</button>
+                <button onClick={handleLogout} className="bg-destructive text-white font-semibold py-2 px-4 rounded-lg hover:bg-destructive-dark transition-colors duration-300">Logout</button>
              </div>
         </header>
         
         <main className={`flex-grow p-4 grid grid-cols-10 gap-4 transition-filter duration-300 ${!isShiftActive || !!modalProduct || !!variantProduct || isCheckoutOpen ? 'blur-sm pointer-events-none' : ''}`}>
-            <div className={`col-span-7 bg-white p-4 rounded-lg shadow ${!activeCart ? 'opacity-50 pointer-events-none' : ''}`}>
-                <h2 className="text-xl font-bold text-gray-700 mb-4">Daftar Produk</h2>
+            <div className={`col-span-7 bg-surface p-4 rounded-lg shadow ${!activeCart ? 'opacity-50 pointer-events-none' : ''}`}>
+                <h2 className="text-xl font-bold text-text-secondary mb-4">Daftar Produk</h2>
                 <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
                     {categories.map(category => (
                         <button
@@ -346,7 +346,7 @@ const POSPage: React.FC = () => {
                             onClick={() => setSelectedCategory(category)}
                             className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-200 ${
                                 selectedCategory === category
-                                    ? 'bg-indigo-600 text-white shadow'
+                                    ? 'bg-primary text-white shadow'
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
@@ -359,18 +359,18 @@ const POSPage: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {filteredProducts.map(product => (
-                            <div key={product.id} onClick={() => handleProductClick(product)} className="border rounded-lg p-2 cursor-pointer hover:shadow-lg hover:border-indigo-500 transition-all duration-200 flex flex-col">
+                            <div key={product.id} onClick={() => handleProductClick(product)} className="border rounded-lg p-2 cursor-pointer hover:shadow-lg hover:border-primary transition-all duration-200 flex flex-col">
                                 <img src={product.image_url} alt={product.name} className="w-full h-32 object-cover rounded-md mb-2" />
-                                <h3 className="font-semibold text-sm text-gray-800 flex-grow">{product.name}</h3>
-                                <p className="text-indigo-600 font-bold mt-1">Rp{product.price.toLocaleString('id-ID')}</p>
+                                <h3 className="font-semibold text-sm text-text-primary flex-grow">{product.name}</h3>
+                                <p className="text-primary font-bold mt-1">Rp{product.price.toLocaleString('id-ID')}</p>
                             </div>
                         ))}
                     </div>
                 )}
             </div>
 
-            <div className="col-span-3 bg-white p-4 rounded-lg shadow flex flex-col">
-                <h2 className="text-xl font-bold text-gray-700 mb-4">Keranjang</h2>
+            <div className="col-span-3 bg-surface p-4 rounded-lg shadow flex flex-col">
+                <h2 className="text-xl font-bold text-text-secondary mb-4">Keranjang</h2>
                 {renderCartContent()}
             </div>
         </main>
