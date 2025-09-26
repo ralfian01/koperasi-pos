@@ -1,7 +1,7 @@
 // This is a mock API service. It simulates a network request.
 // In a real application, this would use axios or fetch to call a real backend.
 
-const API_BASE_URL = 'https://api.majukoperasiky.my.id';
+const API_BASE_URL = 'https://api.majukoperasiku.my.id';
 
 export const login = async (username: string, password: string): Promise<{ token: string }> => {
   const credentials = btoa(`${username}:${password}`);

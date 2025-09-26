@@ -1,7 +1,7 @@
 // This is a mock API service for shift management.
 // It simulates network requests for starting and stopping a shift.
 
-const API_BASE_URL = 'https://api.majukoperasiky.my.id';
+const API_BASE_URL = 'https://api.majukoperasiku.my.id';
 
 const getAuthHeaders = (): Headers => {
   const token = localStorage.getItem('token');

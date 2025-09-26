@@ -5,7 +5,7 @@ export interface TimeSlot {
   is_available: boolean;
 }
 
-const API_BASE_URL = 'https://api.majukoperasiky.my.id';
+const API_BASE_URL = 'https://api.majukoperasiku.my.id';
 
 const getAuthHeaders = (): Headers => {
   const token = localStorage.getItem('token');
